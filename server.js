@@ -1,9 +1,30 @@
 require('dotenv').config();
+require('colors')
 const express = require('express');
+const path = require('path')
+const morgan = require('morgan')
 
 
-const PORT =  process.env.PORT
 const app = express()
+// connect to database
+require('./configs/db.config')
+//connect to passport
+require('./configs/passport/export-passport')(app)
 
 
-app.listen(PORT, ()=> console.log(`app running on port ${PORT}`))
+
+
+app.use(express.json())
+app.use(express.urlencoded({extended: false}))
+app.use(express.static(path.join(__dirname, 'public')))
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+}
+
+
+// routes
+app.use('/', require('./routes/users/user-routes'))
+
+
+module.exports = app;
+
