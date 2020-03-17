@@ -26,7 +26,6 @@ router.post('/login',  (req,res, next) => {
         }
 
         foundUser.password = undefined
-
         res.json(foundUser);
     })
 .catch(err => next(err))
