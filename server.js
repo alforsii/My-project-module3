@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === 'development') {
 
 
 // routes
-app.use('/', require('./routes/users/user-routes'))
+app.use('/', require('./routes/auth/auth-routes'))
 
 
 module.exports = app;
