@@ -4,7 +4,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const bcryptjs = require('bcryptjs')
-const User = require('../../model/User.model')
+const User = require('../../models/User.model')
 const routeGuard = require('../../configs/route-guard.configs');
 
 
@@ -82,15 +82,25 @@ router.post('/logout', routeGuard, (req, res, next) => {
     req.logout();
     res.status(200).json({ message: 'Logout successful!' });
   });
+
+// delete user
+//=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==
+router.delete('/:id', routeGuard, (req, res, next) => {
+    User.findByIdAndDelete(req.params.id)
+    .then(deletedUser => {
+      res.status(200).json({message: 'User deleted', data: deletedUser})
+    })
+    .catch(err => res.status(400).json({message: err}))
+  });
   
-  // router.get('/isLoggedIn', (req, res) => {
-  //   if (req.user) {
-  //     req.user.password = undefined;
-  //     res.status(200).json({ user: req.user });
-  //     return;
-  //   }
-  //   res.status(401).json({ message: 'You are not logged in!' });
-  // });
+  router.get('/isLoggedIn', (req, res) => {
+    if (req.user) {
+      req.user.password = undefined;
+      res.status(200).json({ user: req.user });
+      return;
+    }
+    res.status(401).json({ message: 'You are not logged in!' });
+  });
 //=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==
 router.get('/users', (req,res) => {
 

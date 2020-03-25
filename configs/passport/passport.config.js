@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const LocalStrategy = require('passport-local').Strategy
 const bcryptjs = require('bcryptjs')
 const saltRounds = 10;
-const User = require('../../model/User.model')
+const User = require('../../models/User.model')
 
 //Signup
 passport.use('local-signup', new LocalStrategy({
@@ -30,7 +30,7 @@ passport.use('local-signup', new LocalStrategy({
     //     return;
     //     }
         
-        bcryptjs.hash(password, 10)
+        bcryptjs.hash(password, saltRounds)
         .then(hashedPassword =>{
             return User.create({
                 username,
