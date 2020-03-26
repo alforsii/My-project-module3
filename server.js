@@ -8,14 +8,7 @@ var cors = require('cors')
 
 const app = express()
 
-//Cors settings
-app.use(cors({
-    // origin: ['www.web-side.com', ...]
-    "origin": "*",
-  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-  "preflightContinue": false,
-  "optionsSuccessStatus": 204
-}))
+
 // connect to database
 require('./configs/db.config')
 //connect to passport
@@ -30,16 +23,23 @@ app.use(express.static(path.join(__dirname, 'public')))
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
+app.use(cors({
+    // origin: ['www.web-side.com', ...]
+   origin: true,
+   credentials: true,
+//    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+//    optionsSuccessStatus: 204,
+//    preflightContinue: false
+}))
 
-// app.use((req, res, next) => {
-//     res.header('Access-Control-Allow-Origin', '*') //can restrict
-//     res.header('Access-Control-Allow-Header', 'Origin, X-Requested-With', 'Content-Type', 'Accept', 'Authorization')
-//     if(req.method === 'OPTIONS') {
-//         res.header('Access-Control-Allow-Methods', 'PUT', 'POST', 'PATCH', 'GET', 'DELETE')
-//         return res.status(200).json({})
-//     }
-//     next()
-// })
+//Cors settings
+// app.use(cors({
+//     // origin: ['www.web-side.com', ...]
+//     "origin": true,
+//   "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+//   "preflightContinue": false,
+//   "optionsSuccessStatus": 204
+// }))
 
 // routes
 app.use('/api/auth', require('./routes/auth/auth-routes'))
