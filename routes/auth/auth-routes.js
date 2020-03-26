@@ -59,13 +59,11 @@ router.post('/login', (req, res, next) => {
         res.status(500).json({ message: 'Something went wrong with database query.' });
         return
       }
-  
-      console.log("Output for: user", user)
+
       if (!user) {
         res.status(401).json(failureDetails);
         return
     }
-    console.log("user", user)
   
       req.login(user, err => {
         if (err) return res.status(500).json({ message: 'Something went wrong with login!' });
@@ -85,7 +83,7 @@ router.post('/logout', routeGuard, (req, res, next) => {
 
 // delete user
 //=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==
-router.delete('/:id', routeGuard, (req, res, next) => {
+router.delete('/delete-user/:id', routeGuard, (req, res, next) => {
     User.findByIdAndDelete(req.params.id)
     .then(deletedUser => {
       res.status(200).json({message: 'User deleted', data: deletedUser})
@@ -99,7 +97,7 @@ router.delete('/:id', routeGuard, (req, res, next) => {
       res.status(200).json({ user: req.user });
       return;
     }
-    res.status(401).json({ message: 'You are not logged in!' });
+    res.status().json({ message: 'You are not logged in!' });
   });
 //=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==
 router.get('/users', (req,res) => {
