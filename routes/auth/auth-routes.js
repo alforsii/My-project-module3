@@ -103,7 +103,31 @@ router.delete('/delete-user/:id', routeGuard, (req, res, next) => {
 router.get('/users', (req,res) => {
 
     User.find()
-    .then(users => res.status(200).json(users))
+    .populate({
+      path: 'userChatBoards',
+      populate: [{path: 'messages', populate: [{path: 'author'}, {path: 'receiverID'}]}]
+  })
+    .then(users => {
+      const filterResFromDB = users.map(user => {
+        user.password = undefined
+       user.userChatBoards = user.userChatBoards.map(board => {
+          // const { _id,users,messages,author,sender,receiver} = board
+          board.messages = board.messages.map(message => {
+                  message.author.password = undefined
+                  message.receiverID.password = undefined
+                  return message
+              })
+                  return board
+          })
+          return user
+      })
+        res.status(200).json(filterResFromDB)
+      // const copyUsers = users.map(user => {
+      //   user.password = undefined
+      //   return user
+      // })
+      // res.status(200).json(copyUsers)
+    })
     .catch(err => console.log(err))
 })
 

@@ -43,7 +43,7 @@ app.use(cors({
 
 // routes
 app.use('/api/auth', require('./routes/auth/auth-routes'))
-app.use('/api/', require('./routes/nodemailer/nodemailer'))
+app.use('/api/messages', require('./routes/messages/messages-routes'))
 
 
 module.exports = app;
