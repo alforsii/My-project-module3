@@ -121,6 +121,7 @@ router.get('/users', (req,res) => {
           })
           return user
       })
+      // .filter(user => user._id.toString() !== req.user._id.toString())
         res.status(200).json(filterResFromDB)
       // const copyUsers = users.map(user => {
       //   user.password = undefined
