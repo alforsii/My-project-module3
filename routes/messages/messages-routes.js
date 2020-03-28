@@ -12,9 +12,7 @@ router.get('/', (req, res) => {
         populate: [{path: 'messages', populate: [{path: 'author'}, {path: 'receiverID'}]}]
     })
     .then(resFromDB => {
-        // console.log(resFromDB.userChatBoards)
         const filterResFromDB = resFromDB.userChatBoards.map(board => {
-        // const { _id,users,messages,author,sender,receiver} = board
         board.messages = board.messages.map(message => {
                 message.author.password = undefined
                 message.receiverID.password = undefined
@@ -25,6 +23,33 @@ router.get('/', (req, res) => {
         res.status(200).json(filterResFromDB)
     })
     .catch(err => console.log(err))
+})
+
+//check if current user have a board with random user, if no create one
+router.post('/board', (req, res) => {
+    const randomUser = req.body
+    console.log("randomUser", randomUser)
+    User.findById(req.user._id)
+    .populate({
+        path: 'userChatBoards',
+        populate: [{path: 'messages', populate: [{path: 'author'}, {path: 'receiverID'}]}]
+    })
+    .then(user => {
+       const board = user.userChatBoards.filter(board => board.users.includes(randomUser._id))
+       console.log("board", board)
+       if(board.length > 0){
+           const messages = board[0].messages.map(message =>{
+            message.author.password = undefined
+            message.receiverID.password = undefined
+            return message
+           })
+           res.status(200).json(messages)
+       }
+       else {
+        res.status(200).json([])
+       }
+       
+    })
 })
 
 //==-=-=-=-=-==-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=
