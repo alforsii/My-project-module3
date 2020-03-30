@@ -15,6 +15,15 @@ const chatsSchema = new Schema(
     sender: String,
     receiver: String,
 
+    newMessages:  {
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'Message',
+        },
+      ],
+    },
+
     messages: {
       type: [
         {
@@ -24,6 +33,7 @@ const chatsSchema = new Schema(
       ],
     },
   },
+
   {
     timestamps: true,
   }
