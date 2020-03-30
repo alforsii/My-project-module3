@@ -27,16 +27,16 @@ router.get('/', (req, res) => {
 
 //check if current user have a board with random user, if no create one
 router.post('/board', (req, res) => {
-    const randomUser = req.body
-    console.log("randomUser", randomUser)
+    const randomUserId = req.body.id
+
     User.findById(req.user._id)
     .populate({
         path: 'userChatBoards',
         populate: [{path: 'messages', populate: [{path: 'author'}, {path: 'receiverID'}]}]
     })
     .then(user => {
-       const board = user.userChatBoards.filter(board => board.users.includes(randomUser._id))
-       console.log("board", board)
+       const board = user.userChatBoards.filter(board => board.users.includes(randomUserId))
+
        if(board.length > 0){
            const messages = board[0].messages.map(message =>{
             message.author.password = undefined
