@@ -5,28 +5,28 @@ const Message = require('../../models/Message.model');
 const User = require('../../models/User.model')
 
 
-let newMessage = false
-
-router.get('/', (req, res) => {
-    User.findById(req.user._id)
-    .populate({
-        path: 'userChatBoards',
-        populate: [{path: 'newMessages', populate: [{path: 'author'}, {path: 'receiverID'}]}]
-    })
-    .then(resFromDB => {
-        const filterResFromDB = resFromDB.userChatBoards.map(board => {
-        console.log("Output for: board", board)
-        board.newMessages = board.newMessages.map(message => {
-        console.log("Output for: message", message)
-                message.author.password = undefined
-                message.receiverID.password = undefined
-                return message
-            })
-                return board
-        })
-        res.status(200).json(filterResFromDB)
-    })
-    .catch(err => console.log(err))
+//get current user boards
+//==-=-=-=-=-==-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-==-=-==--=-=-=-
+router.get('/boards', (req, res) => {
+  User.findById(req.user._id)
+  .populate({
+      path: 'userChatBoards',
+      populate: [{path: 'newMessages', populate: [{path: 'author'}, {path: 'receiverID'}]}]
+  })
+  .then(resFromDB => {
+      const filterResFromDB = resFromDB.userChatBoards.map(board => {
+      // console.log("Output for: board", board)
+      board.newMessages = board.newMessages.map(message => {
+      // console.log("Output for: message", message)
+              message.author.password = undefined
+              message.receiverID.password = undefined
+              return message
+          })
+              return board
+      })
+      res.status(200).json(filterResFromDB)
+  })
+  .catch(err => console.log(err))
 })
 
 //check if current user have a board with random user, if no create one
@@ -40,7 +40,6 @@ router.post('/board', (req, res) => {
         populate: [{ path: 'newMessages', populate: [{path: 'author'}, {path: 'receiverID'}]}]
     })
     .then(user => {
-    console.log("User boards", user)
        const board = user.userChatBoards.filter(board => board.users.includes(randomUserId))
 
        if(board.length > 0){
@@ -56,6 +55,7 @@ router.post('/board', (req, res) => {
             message.receiverID.password = undefined
             return message
            })
+          //  console.log("Output for: newMessages", newMessages)
            res.status(200).json({messages, newMessages})
        }
        else {
@@ -66,16 +66,10 @@ router.post('/board', (req, res) => {
 })
 
 
-//add read newMessages to old messages
-router.post('/update-read-messages', (req, res) => {
-
-})
-
 //update or create new Char board and add new messages to newMessages of each Chat board
 //==-=-=-=-=-==-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-
 router.post('/add-new-message', (req, res) => {
     const { otherUser, message} = req.body
-    console.log("Output for: req.body", req.body)
 
     //check for email && message inputs
     if (!req.user) {

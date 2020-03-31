@@ -1,25 +1,30 @@
 module.exports = io => {
-    const Chat = require('../../models/Chat.model');
+  const Chat = require('../../models/Chat.model');
   const Message = require('../../models/Message.model');
   const User = require('../../models/User.model')
 
-
-
   
   io.on('connection', socketIO => {
-    socketIO.emit('message', 'Hello')
+    socketIO.emit('message', 'Welcome to IronSchool ChatBot')
     // console.log('new connection: ' + socketIO.id);
-
+    //=-=-=--=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=---=-=-=-=-=-=--=-=-=-==---=
+    //=-=-=--=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=---=-=-=-=-=-=--=-=-=-==---=
+    socketIO.on('greeting', username => {
+    console.log("Output for: username", username.user)
+      socketIO.broadcast.emit('message', `${username.user} has join the chat`)
+      socketIO.broadcast.emit('status', true)
+    })
     //Send the status
     const sendStatus = function(s) {
       setTimeout(() => {
         socketIO.emit('status', s);
       }, 500);
     };
-
+    //=-=-=--=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=---=-=-=-=-=-=--=-=-=-==---=
     //Receive the data from socketIO.js(client) when user clicked
+    //=-=-=--=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=---=-=-=-=-=-=--=-=-=-==---=
     socketIO.on('get-user-messages', usersData => {
-      console.log('Output for: usersData', usersData);
+      // console.log('Output for: usersData', usersData);
       //data is userInSessionID and the other user (array of two users that belongs to the board)
       // - I actually need a single board id for two users -
       // one is the user in session and the other selected to send message
@@ -29,7 +34,6 @@ module.exports = io => {
 
       // //Get chat from DB and display when selected
       Message.find()
-        .limit(20)
         .sort({
           _id: 1,
         })
@@ -43,10 +47,10 @@ module.exports = io => {
             );
           });
 
-          console.log('filteredMessagesByChatBoard: ', filteredMessagesByChatBoard);
+          // console.log('filteredMessagesByChatBoard: ', filteredMessagesByChatBoard);
           if (filteredMessagesByChatBoard) {
             socketIO.emit('output', filteredMessagesByChatBoard); //send msg data
-            socketIO.emit('updateDeleteBtnStatus');
+            // socketIO.emit('updateDeleteBtnStatus');
           }
         })
         .catch(err =>
@@ -55,7 +59,45 @@ module.exports = io => {
           )
         );
     });
+
+//=-=-=--=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=---=-=-=-=-=-=--=-=-=-==---=
+//Update message status
+//=-=-=--=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=---=-=-=-=-=-=--=-=-=-==---=
+    socketIO.on('update-status', data => {
+    const  currUserId = data[0]
+    const  otherUserID = data[1]
+
+      User.findById(currUserId)
+      .populate({
+        path: 'userChatBoards',
+        populate: [{ path: 'newMessages', populate: [{path: 'author'}, {path: 'receiverID'}]}]
+    })
+      .then(user => {
+        const boards = user.userChatBoards.filter(board => {
+          return board.users.includes(otherUserID)
+        })
+
+        if(boards.length > 0){
+            //get new messages
+            const msgIds = boards[0].newMessages.filter(message =>
+             message.author._id.toString() === otherUserID.toString() &&
+             message.new === true).map(msg => msg._id)
+              //update all new messages
+              if(msgIds.length > 0){
+                Message.updateMany({_id: {$in: msgIds}}, { $set: {new: false}},{new: true})
+                .then(resFromDB => {
+                // console.log(" resFromDB", resFromDB)
+                })
+                .catch(err => console.log(err))
+              }
+            }
+      })
+      .catch(err=> console.log(err))
+    })
+
+    //=-=-=--=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=---=-=-=-=-=-=--=-=-=-==---=
     //Handle input events
+    //=-=-=--=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=---=-=-=-=-=-=--=-=-=-==---=
     //-receive the date, which was sent from socketIO.js (front end - client)
     socketIO.on('send-message', data => {
     console.log("Output for: data", data)
@@ -155,7 +197,7 @@ module.exports = io => {
                         newlyCreatedChatBoard._id,
                         {
                           $push: {
-                            messages: createdMessage._id,
+                            newMessages: createdMessage._id,
                           }, //pushing new message ref: id -> to Chat board property, which is messages
                         },
                         {
@@ -200,7 +242,7 @@ module.exports = io => {
                     foundChatBoard[0]._id, //we could pass her createdMessage.messageBoard -- it should be the same since we're inside then(response from DB)
                     {
                       $push: {
-                        messages: createdMessage._id,
+                        newMessages: createdMessage._id,
                       }, //pushing new message ref: id -> to existing Chat board property - messages, which is in foundChatBoard
                     },
                     {
@@ -282,9 +324,11 @@ module.exports = io => {
         .catch(err => console.log(err));
     });
 
-    //------- Disconnected ---------------------------
-    // socketIO.on('disconnect', function() {
-    //   console.log('disconnect: ' + socketIO.id);
-    // });
+      //------- Disconnected ---------------------------
+      socketIO.on('disconnect', username => {
+        console.log(socketIO.id)
+        io.emit('message', `${username.user} has left the chat`)
+        io.emit('status', false)
+      });
   }); //end socketIO connection
 }

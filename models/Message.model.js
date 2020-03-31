@@ -24,6 +24,10 @@ const messageSchema = new Schema(
     message: {
       type: String,
     },
+    new: {
+      type: Boolean,
+      default: true
+    },
     // the message board that this message belongs to
     messageBoard: {
       type: Schema.Types.ObjectId,
