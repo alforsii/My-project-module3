@@ -34,7 +34,8 @@ app.use(
 
 // routes
 app.use('/api/auth', require('./routes/auth/auth-routes'))
-app.use('/api/messages', require('./routes/messages/messages-routes'))
+app.use('/api/messages', require('./routes/messages/get-post-routes'))
+app.use(require('./routes/messages/messaging.io'))
 
 
 module.exports = app;
