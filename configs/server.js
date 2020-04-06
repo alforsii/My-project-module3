@@ -18,7 +18,7 @@ var port = normalizePort(process.env.PORT || 5000);
 app.set('port', port);
 
 //socket route
-require('../routes/messages/messaging.io')(io);
+// require('../routes/messages/messaging.io')(io);
 
 /**
  * Listen on provided port, on all network interfaces.

@@ -141,7 +141,7 @@ router.delete('/delete-user/:id', routeGuard, (req, res, next) => {
       res.status(200).json({ user: req.user });
       return;
     }
-    res.status().json({ message: 'You are not logged in!' });
+    res.status(401).json({ message: 'You are not logged in!' });
   });
 //=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==
 router.get('/users', (req,res) => {

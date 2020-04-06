@@ -23,7 +23,7 @@ app.use(
     cors({
          // origin: ['www.web-side.com', 'http://localhost:3000']
       // origin: [process.env.FRONTEND_POINT],
-      origin: ['http://localhost:3000','http://localhost:3002'],
+      origin: true,
       credentials: true, // this needs set up on the frontend side as well
       //                   in axios "withCredentials: true"
       //    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -35,6 +35,8 @@ app.use(
 // routes
 app.use('/api/auth', require('./routes/auth/auth-routes'))
 app.use('/api/messages', require('./routes/messages/get-post-routes'))
+app.use('/api/messages', require('./routes/messages/update-status'))
+app.use('/api/profile', require('./routes/users/update-profile'))
 app.use(require('./routes/messages/messaging.io'))
 
 

@@ -5,7 +5,7 @@ module.exports = io => {
 
   
   io.on('connection', socketIO => {
-    socketIO.emit('message', 'Welcome to IronSchool ChatBot')
+    socketIO.emit('message', 'Welcome to IronChatBot')
     // console.log('new connection: ' + socketIO.id);
     //=-=-=--=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=---=-=-=-=-=-=--=-=-=-==---=
     //=-=-=--=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=---=-=-=-=-=-=--=-=-=-==---=
@@ -24,6 +24,7 @@ module.exports = io => {
     //Receive the data from socketIO.js(client) when user clicked
     //=-=-=--=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=---=-=-=-=-=-=--=-=-=-==---=
     socketIO.on('get-user-messages', usersData => {
+    console.log("usersData", usersData)
       // console.log('Output for: usersData', usersData);
       //data is userInSessionID and the other user (array of two users that belongs to the board)
       // - I actually need a single board id for two users -
@@ -64,6 +65,7 @@ module.exports = io => {
 //Update message status
 //=-=-=--=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=---=-=-=-=-=-=--=-=-=-==---=
     socketIO.on('update-status', data => {
+    console.log("Output for: data", data)
     const  currUserId = data[0]
     const  otherUserID = data[1]
 
@@ -86,7 +88,7 @@ module.exports = io => {
               if(msgIds.length > 0){
                 Message.updateMany({_id: {$in: msgIds}}, { $set: {new: false}},{new: true})
                 .then(resFromDB => {
-                // console.log(" resFromDB", resFromDB)
+                console.log(" resFromDB", resFromDB)
                 })
                 .catch(err => console.log(err))
               }
@@ -330,5 +332,5 @@ module.exports = io => {
         io.emit('message', `${username.user} has left the chat`)
         io.emit('status', false)
       });
-  }); //end socketIO connection
+  }, {withCredentials: true}); //end socketIO connection
 }
