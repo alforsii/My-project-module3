@@ -74,7 +74,12 @@ router.post('/add-new-message', (req, res) => {
     //check for email && message inputs
     if (!req.user) {
         res.status(500).json({message: 'Error in server'})
-      } else {
+        return
+      } 
+    if (!message) {
+        res.status(401).json({message: 'Type message to send'})
+        return
+      } 
 
         User.findById(req.user._id)
           .populate('userChatBoards')
@@ -231,7 +236,7 @@ router.post('/add-new-message', (req, res) => {
             //end else statement
           })
           .catch(err => console.log(`Error while looking current user ${err}`));
-      }
+
       //end 
 })
 
