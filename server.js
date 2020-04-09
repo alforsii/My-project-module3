@@ -34,6 +34,7 @@ app.use(
 
 // routes
 app.use('/api/auth', require('./routes/auth/auth-routes'))
+app.use('/api/classes', require('./routes/classes/class-routes'))
 app.use('/api/messages', require('./routes/messages/get-post-routes'))
 app.use('/api/messages', require('./routes/messages/update-status'))
 app.use('/api/profile', require('./routes/users/update-profile'))

@@ -24,6 +24,14 @@ const messageSchema = new Schema(
     message: {
       type: String,
     },
+    images: {
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'Image',
+        },
+      ],
+    },
     new: {
       type: Boolean,
       default: true

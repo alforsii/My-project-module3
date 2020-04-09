@@ -10,9 +10,13 @@ const usersSchema = new Schema({
     state: String,
     country: String,
     phone: String,
+    title: {
+      type: String,
+      default: 'Student'
+    },
     password: String,
     path: { type: String, default: '/images/default-img.png' },
-    friends: { type: [{ type: Schema.Types.ObjectId, ref: 'Friend' }] },
+    classes: { type: [{ type: Schema.Types.ObjectId, ref: 'Class' }] },
     // the boards that have been created by the user
     userChatBoards: {
       type: [
