@@ -17,7 +17,7 @@ const usersSchema = new Schema({
     password: String,
     path: { type: String, default: '/images/default-img.png' },
     classes: { type: [{ type: Schema.Types.ObjectId, ref: 'Class' }] },
-    // the boards that have been created by the user
+    archive: { type: [{ type: Schema.Types.ObjectId, ref: 'Class' }] },
     userChatBoards: {
       type: [
         {
