@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
 const { Schema, model } = mongoose;
 
-const studentsSchema = new Schema(
+const teachersSchema = new Schema(
   {
     author: { type: Schema.Types.ObjectId, ref: 'User' },
-    student: { type: Schema.Types.ObjectId, ref: 'User' },
+    teacher: { type: Schema.Types.ObjectId, ref: 'User' },
   },
   {
     timestamps: true,
   }
 );
 
-module.exports = model('Student', studentsSchema);
+module.exports = model('Teacher', teachersSchema);

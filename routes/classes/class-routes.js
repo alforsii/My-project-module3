@@ -1,29 +1,57 @@
 const express = require('express');
 const router = express.Router();
+const uploadCloud = require('../../configs/cloudinary.config');
 const User = require('../../models/User.model');
 const Class = require('../../models/Class.model');
 const Student = require('../../models/Student.model');
+const Teacher = require('../../models/Teacher.model')
 
+//-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
 //Get current teachers/students all classes
 //-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
 router.get('/', (req, res) => {
-  Class.find({ author: req.user._id })
-    .populate('students')
-    .populate('author')
-    .then(classesFromDB => {
-      res.status(200).json({ classes: classesFromDB });
+  getAllClasses(req.user._id, res)
+});
+//Get all classes function from users classes list
+function getAllClasses(id, res){
+  User.findById(id)
+  .populate({
+    path: 'classes',
+    populate: [{ path: 'author'}, { path: 'students', populate: [{ path: 'student'}]}]
+  })
+    .then(userFromDB => {
+      const updatedClasses = userFromDB.classes.map(eachClass => {
+        eachClass.author.password = undefined
+        eachClass.students = eachClass.students.map(data => {
+          data.student.password = undefined
+          return data
+        })
+        return eachClass
+      })
+      res.status(200).json({ classes: updatedClasses });
     })
     .catch(err => console.log(`Error while getting all classes ${err}`));
-});
+}
+//-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
 //Create a class
 //-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
-router.post('/create-class', (req, res) => {
-  const { name, grade } = req.body;
-  Class.create({ name, grade, author: req.user._id })
-    .then(newlyCreatedClass => {
+router.post('/create-class', uploadCloud.single('image'), (req, res) => {
+  // const { name, grade, schoolYearStart, schoolYearEnd, description } = req.body;
+  const { _id } = req.user
+  if (!req.file) {
+    createNewClass(_id,{ ...req.body, author: _id }, res)
+  } else {
+    createNewClass(_id,{ ...req.body, path: req.file.url, author: _id,}, res)
+  }
+});
+
+//Create class function
+function createNewClass(userId, classBody , res) {
+  Class.create( classBody )
+    .then(newlyCreatedClass => { 
       //now update users classes list
       User.findByIdAndUpdate(
-        req.user._id,
+        userId,
         {
           $push: {
             classes: newlyCreatedClass._id,
@@ -43,23 +71,35 @@ router.post('/create-class', (req, res) => {
         );
     })
     .catch(err => console.log(`Error while creating a new Class ${err}`));
-});
-
-// Get a single class
+}
 //-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
-router.get('/current-class', (req, res) => {
+//Remove a class
+//-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
+router.post('/remove-class', (req, res) => {
   const { classId } = req.body;
-  Class.find({ _id: classId })
-    .populate('students')
-    .populate('author')
-    .then(userClass => {
-      res.status(200).json({ class: userClass });
-    })
-    .catch(err => console.log(`Error while getting user album ${err}`));
-});
 
+  User.findByIdAndUpdate(req.user._id,{$pull: {classes: classId}})
+  .then(updatedUser => {
+    User.findByIdAndUpdate(req.user._id,{$push: {archive: classId}}, {new: true})
+    .then(updatedUser => {
+      getAllClasses(req.user._id, res)
+    })
+    .catch(err => console.log(`Error while adding class to archive ${err}`))
+  })
+  .catch(err => console.log(`Error while moving removing class to archive ${err}`))
+    // Class.findById(classId)
+    //   .then(foundClass => {
+    //     //now update users classes list
+    //     const { author, students, teachers } = foundClass
+    //     Student.deleteMany({ _id: { $in: students } })
+    //     Teacher.deleteMany({ _id: { $in: teachers } })
+    //   })
+    //   .catch(err => console.log(`Error while creating a new Class ${err}`));
+
+});
+//-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
 //Add student to the class
-//================================================================
+//-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
 router.post('/add-student', (req, res) => {
   //1.Current user/teacher in session
   const { userId, classId } = req.body;
@@ -69,24 +109,31 @@ router.post('/add-student', (req, res) => {
     student: userId,
   })
     .then(newStudent => {
-      User.findByIdAndUpdate(
-        userId,
-        { $push: { classes: classId } },
-        { new: true }
-      )
-        .then(classAddedToStudent => {})
-        .catch(err =>
-          console.log(
-            `Error while adding class to the students classes list ${err}`
-          )
-        );
+      // User.findByIdAndUpdate(
+      //   userId,
+      //   { $push: { classes: classId } },
+      //   { new: true }
+      // )
+      //   .then(classAddedToStudent => {})
+      //   .catch(err =>
+      //     console.log(
+      //       `Error while adding class to the students classes list ${err}`
+      //     )
+      //   );
       Class.findByIdAndUpdate(
         classId,
         { $push: { students: newStudent._id } },
         { new: true }
       )
         .then(classUpdated => {
-          res.status(200).json({ class: classUpdated });
+
+          Student.findById(newStudent._id)
+          .populate('student')
+          .then(studentFromDB => {
+            studentFromDB.student.password = undefined
+            res.status(200).json({ studentFromDB });
+          })
+          .catch(err => console.log(err))
         })
         .catch(err =>
           console.log(
@@ -96,84 +143,33 @@ router.post('/add-student', (req, res) => {
     })
     .catch(err => console.log(`Error while creating a new student ${err}`));
 });
+//-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
+//Remove student from the class
+//-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
+router.post('/remove-student', (req, res,) => {
+  const { studentData, classId } = req.body;
+  Class.findByIdAndUpdate({_id: classId}, { $pull: { students: studentData._id }}, {new: true} )
+  .populate({
+    path: 'students',
+    populate: [{ path: 'student'}]
+  })
+    .then(updatedClassFromDB => {
 
-//--------- Add to class/helper function -----------------
-//================================================================
-function addToClass(newlyCreatedStudent, userId, res) {
-  User.findByIdAndUpdate(
-    userId,
-    {
-      $push: {
-        classes: newlyCreatedStudent._id,
-      },
-    },
-    {
-      new: true,
-    }
-  )
-    .then(updatedUser => {
-      console.log('updatedUser: ');
-    })
-    .catch(err =>
-      console.log(`Error while trying to update friends list ${err}`)
-    );
-}
-//Delete Album
-//=--=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-==-=-
-router.post('/delete-album', (req, res, next) => {
-  const { album_id } = req.query;
-  //1.get the album (we could delete right away but we want to delete all images that this album has since we're deleting the album there's no use of those images that belong to this album)
-  Album.findById(album_id)
-    .then(albumFromDB => {
-      console.log('albumFromDB: ', albumFromDB);
-      //2.Delete all images for this album from Image.model(images collection)from DB
-      Image.deleteMany({ _id: { $in: albumFromDB.images } })
-        .then(imagesDeleted => {
-          console.log(imagesDeleted);
-          //3.Now delete Album
-          Album.findByIdAndRemove(album_id)
-            .then(deletedAlbum => {
-              // console.log('deletedAlbum: ', deletedAlbum);
-              res.redirect('/posts/photo-albums');
-            })
-            .catch(err =>
-              console.log(
-                `Error while deleting Album after all images deleted ${err}`
-              )
-            );
+      Student.findByIdAndRemove(studentData._id)
+      .then(studentRemoved => {
+        const updatedStudents = updatedClassFromDB.students.map(data => {
+          data.student.password = undefined
+          return data
         })
-        .catch(err =>
-          console.log(
-            `Error while deleting all images before album deletion ${err}`
-          )
-        );
+        res.status(200).json({updatedStudents})
+      })
+      .catch(err => console.log(`Error while deleting student ${err}`))
     })
     .catch(err =>
-      console.log(`Error while looking for album for deletion ${err}`)
+      console.log(`Error while getting user students to remove a student ${err}`)
     );
 });
 
-//Delete image from album
-//================================================================
-router.post('/delete-image', (req, res, next) => {
-  const { image_id } = req.query;
-  //1.Find image by id and delete
-  Image.findByIdAndDelete(image_id)
-    .then(deletedImage => {
-      //2. Remove the deleted image id from Albums images array in DB
-      Album.findOneAndUpdate(
-        { _id: deletedImage.album },
-        { $pull: { images: deletedImage._id } }
-      )
-        .then(updatedAlbum => {
-          console.log('updated album', updatedAlbum);
-          res.redirect(`/posts/album?album_id=${deletedImage.album}`);
-        })
-        .catch(err =>
-          console.log(`Error while updating Album for deleted image ${err}`)
-        );
-    })
-    .catch(err => console.log(`Error while deleting image ${err}`));
-});
+
 
 module.exports = router;

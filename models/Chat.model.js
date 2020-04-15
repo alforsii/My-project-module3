@@ -3,7 +3,8 @@ const { Schema, model } = mongoose;
 
 const chatsSchema = new Schema(
   {
-    // the user that created the Chat board
+    sender: String,
+    receiver: String,
     users: {
       type: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     },
@@ -11,10 +12,6 @@ const chatsSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
-    // the user that generated this message
-    sender: String,
-    receiver: String,
-
     newMessages:  {
       type: [
         {
@@ -23,7 +20,6 @@ const chatsSchema = new Schema(
         },
       ],
     },
-
     messages: {
       type: [
         {
