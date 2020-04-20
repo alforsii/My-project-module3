@@ -7,7 +7,7 @@ const classesSchema = new Schema(
     grade: String,
     schoolYearStart: String,
     schoolYearEnd: String,
-    path: String,
+    path: { type: String, default: '/images/school-class.jpg'},
     description: String,
     author: { type: Schema.Types.ObjectId, ref: 'User' },
     students: { type: [{ type: Schema.Types.ObjectId, ref: 'Student' }] },

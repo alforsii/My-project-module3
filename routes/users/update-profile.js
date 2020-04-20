@@ -30,6 +30,19 @@ router.post('/upload-photo',routeGuard, uploadCloud.single('image'),
         .catch(err => res.status(500).json({message: 'Server error'}));
     }
   );
+//POST update cover image
+//=--=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-==-=-
+router.post('/update/dashboard-image',routeGuard, uploadCloud.single('image'),
+    (req, res) => {
+      User.findByIdAndUpdate(req.user._id, {
+        dashboardImg: req.file.url,
+      })
+        .then(userFromDB => {
+          res.status(200).json({user: userFromDB});
+        })
+        .catch(err => res.status(500).json({message: 'Server error'}));
+    }
+  );
 
   
 
