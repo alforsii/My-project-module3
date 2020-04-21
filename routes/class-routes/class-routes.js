@@ -109,6 +109,18 @@ router.post('/remove-class', (req, res) => {
 
 
 
+//-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
+//Update a class/classroom details
+//-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
+router.post('/update-class/:classId', (req, res) => {
+  const { classId} = req.params
+  
+  Class.findByIdAndUpdate(classId, req.body)
+  .then(updatedClass => {
+    res.status(200).json({updatedClass})
+  })
+  .catch(err => console.log(`Error while updating a class details ${err}`))
+})
 
 //POST update cover image
 //=--=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-==-=-
