@@ -36,6 +36,7 @@ app.use(
 app.use('/api/auth', require('./routes/auth/auth-routes'))
 
 app.use('/api/classes', require('./routes/class-routes/class-routes'))
+app.use('/api/classes', require('./routes/class-routes/classworks-routes'))
 app.use('/api/classes', require('./routes/class-routes/class-students-routes'))
 app.use('/api/classes', require('./routes/class-routes/class-teachers-routes'))
 

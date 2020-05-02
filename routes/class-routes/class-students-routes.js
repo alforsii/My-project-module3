@@ -44,13 +44,17 @@ router.get('/:classId/other-students', (req, res) => {
   Class.findById(classId)
     .then(classFromDB => {
       User.find()
+      .sort({ firstName: 1 })
         .then(allUsersFromDB => {
           const otherStudents = allUsersFromDB.filter(
             user =>
               user.title === 'Student' &&
               !classFromDB.students.includes(user._id) &&
               user._id.toString() !== req.user._id.toString()
-          );
+          ).map(user => {
+            user.password = undefined
+            return user
+          })
           res.status(200).json({ students: otherStudents });
         })
         .catch(err => console.log(`Error in DB ${err}`));
@@ -88,6 +92,7 @@ router.post('/add-student', (req, res) => {
                     { new: true }
                   )
                     .then(updatedStudentFromDB => {
+                      updatedStudentFromDB.password = undefined
                       res
                         .status(200)
                         .json({ studentFromDB: updatedStudentFromDB });

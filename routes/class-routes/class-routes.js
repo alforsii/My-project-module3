@@ -15,11 +15,11 @@ function getAllClasses(id,req, res){
   User.findById(id)
   .populate({
     path: 'archive',
-    populate: [{ path: 'author'}, { path: 'students'}]
+    populate: [{ path: 'author'}, { path: 'students'}, { path: 'teachers'}]
   })
   .populate({
     path: 'classes',
-    populate: [{ path: 'author'}, { path: 'students'}]
+    populate: [{ path: 'author'}, { path: 'students'}, { path: 'teachers'}]
   })
     .then(userFromDB => {
       const updatedClasses = removeUsersPassword(userFromDB.classes, req)
@@ -37,6 +37,10 @@ function removeUsersPassword(classes, req) {
       student.password = undefined
       return student
     }).filter(student => student._id.toString() !== req.user._id.toString())
+    eachClass.teachers = eachClass.teachers.map(teacher => {
+      teacher.password = undefined
+      return teacher
+    }).filter(teacher => teacher._id.toString() !== req.user._id.toString())
     return eachClass
   })
 }
@@ -129,7 +133,7 @@ router.post('/update/class-image', uploadCloud.single('image'),
       const { classId } =req.body
       Class.findByIdAndUpdate(classId, {
         path: req.file.url,
-      })
+      }, {new: true})
         .then(classFromDB => {
           res.status(200).json({class: classFromDB});
         })

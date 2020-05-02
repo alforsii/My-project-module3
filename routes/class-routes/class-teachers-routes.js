@@ -44,8 +44,14 @@ router.get('/:classId/other-teachers', (req,res) => {
     Class.findById(classId)
     .then(classFromDB => {
       User.find()
+      .sort({ firstName: 1 })
       .then(allUsersFromDB => {
-        const otherTAs = allUsersFromDB.filter(user => user.title === 'TA' && !classFromDB.teachers.includes(user._id) && user._id.toString() !== req.user._id.toString())
+        const otherTAs = allUsersFromDB.filter(user => 
+          user.title === 'TA' && !classFromDB.teachers.includes(user._id) 
+          && user._id.toString() !== req.user._id.toString()).map(user => {
+            user.password = undefined
+            return user
+          })
         res.status(200).json({ teachers: otherTAs })
       })
       .catch(err => console.log(`Error in DB ${err}`))
@@ -81,6 +87,7 @@ router.post('/add-teacher', (req, res) => {
                       { new: true }
                     )
                       .then(updatedTeacherFromDB => {
+                        updatedTeacherFromDB.password = undefined
                         res
                           .status(200)
                           .json({ teacherFromDB: updatedTeacherFromDB });
