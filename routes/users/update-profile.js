@@ -36,7 +36,7 @@ router.post('/update/dashboard-image',routeGuard, uploadCloud.single('image'),
     (req, res) => {
       User.findByIdAndUpdate(req.user._id, {
         dashboardImg: req.file.url,
-      })
+      }, {new: true})
         .then(userFromDB => {
           res.status(200).json({user: userFromDB});
         })
