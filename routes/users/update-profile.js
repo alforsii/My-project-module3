@@ -9,7 +9,7 @@ const routeGuard = require('../../configs/route-guard.configs');
 //POST update profile
 //=--=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-==-=-
 router.post('/upload-profile',routeGuard,(req, res) => {
-      User.findByIdAndUpdate(req.user._id, req.body)
+      User.findByIdAndUpdate(req.user._id, req.body, {new: true})
         .then(userFromDB => {
         console.log("userFromDB", userFromDB)
           res.status(200).json({user: userFromDB});

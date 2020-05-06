@@ -84,7 +84,11 @@ router.post('/add-student', (req, res) => {
             //here just in case checking if user/student does not have the same class.
             User.findById(userId)
               .then(userFromDB => {
+
+              userFromDB.password = undefined
                 // if not then add class to the students class list.
+                res.status(200).json({ studentFromDB: userFromDB });
+                console.log("student added to classrooms list")
                 if (userFromDB.classes.indexOf(classId) === -1) {
                   User.findByIdAndUpdate(
                     userId,
@@ -93,9 +97,7 @@ router.post('/add-student', (req, res) => {
                   )
                     .then(updatedStudentFromDB => {
                       updatedStudentFromDB.password = undefined
-                      res
-                        .status(200)
-                        .json({ studentFromDB: updatedStudentFromDB });
+                      console.log("class added to students classrooms list")
                     })
                     .catch(err =>
                       console.log(

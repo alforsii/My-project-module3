@@ -69,7 +69,8 @@ router.post('/board', (req, res) => {
 //update or create new Char board and add new messages to newMessages of each Chat board
 //==-=-=-=-=-==-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-
 router.post('/add-new-message', (req, res) => {
-    const { otherUser, message} = req.body
+    const { otherUser, messageInputs} = req.body
+    const { message} = messageInputs
 
     //check for email && message inputs
     if (!req.user) {
@@ -77,7 +78,7 @@ router.post('/add-new-message', (req, res) => {
         return
       } 
     if (!message) {
-        res.status(401).json({message: 'Type message to send'})
+        res.status(401).json({message: 'Please type a message to send!'})
         return
       } 
 
@@ -151,11 +152,11 @@ router.post('/add-new-message', (req, res) => {
 
                   //2.Create message-------------------------------------
                   Message.create({
+                    ...messageInputs, //the message object
                     author: user._id, //author of message
                     receiverID: otherUser._id,
                     receiver: otherUser.username,
                     sender: user.username,
-                    message, //the actual message
                     messageBoard: newlyCreatedChatBoard._id,
                   })
                     .then(createdMessage => {
@@ -196,11 +197,11 @@ router.post('/add-new-message', (req, res) => {
               // foundChatBoard
               //2.Create message-------------------------------------
               Message.create({
+                ...messageInputs, //the message object
                 author: user._id, //author of message
                 receiverID: otherUser._id,
                 receiver: otherUser.username,
                 sender: user.username,
-                message, //the actual message
                 messageBoard: foundChatBoard[0]._id,
               })
                 .then(createdMessage => {

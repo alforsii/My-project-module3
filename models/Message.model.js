@@ -20,6 +20,8 @@ const messageSchema = new Schema(
     },
     sender: String,
     receiver: String,
+    title: String,
+    header: String,
     // the message to be viewed by users
     message: {
       type: String,

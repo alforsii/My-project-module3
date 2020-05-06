@@ -14,9 +14,9 @@ const usersSchema = new Schema({
       type: String,
       default: 'Student'
     },
-    dashboardImg: { type: String, default: '/images/man-walking-dog.jpg'},
     password: String,
     path: { type: String, default: '/images/default-img.png' },
+    dashboardImg: { type: String, default: '/images/man-walking-dog.jpg'},
     classes: { type: [{ type: Schema.Types.ObjectId, ref: 'Class' }] },
     archive: { type: [{ type: Schema.Types.ObjectId, ref: 'Class' }] },
     userChatBoards: {
