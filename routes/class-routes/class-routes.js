@@ -60,6 +60,12 @@ router.post('/create-class', uploadCloud.single('image'), (req, res) => {
 
 //Create class function
 function createNewClass(userId, classBody , res) {
+  const {name} = classBody
+  if(!name) {
+    res.status(401).json({message: 'Please provide at least the name of your class!'})
+    return
+  }
+
   Class.create( classBody )
     .then(newlyCreatedClass => { 
       //now update users classes list
