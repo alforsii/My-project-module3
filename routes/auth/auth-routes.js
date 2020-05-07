@@ -38,22 +38,22 @@ const routeGuard = require('../../configs/route-guard.configs');
 router.post('/signup', (req, res, next) => {
   const { username,firstName, lastName, email, password } = req.body;
 
-  if (!username || !email || !password) {
+  if (!username || !firstName || !lastName || !email || !password) {
     res.status(401).json({
       message:
-        'All fields are mandatory. Please provide your username, email and password.'
+        'All fields are mandatory! Fill out all the inputs and try again'
     });
     return;
   }
 
-  // const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
-  // if (!regex.test(password)) {
-  //   res.status(500).json({
-  //     message:
-  //       'Password needs to have at least 6 chars and must contain at least one number, one lowercase and one uppercase letter.'
-  //   });
-  //   return;
-  // }
+  const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
+  if (!regex.test(password)) {
+    res.status(500).json({
+      message:
+        'Password needs to have at least 6 chars and must contain at least one number, one lowercase and one uppercase letter.'
+    });
+    return;
+  }
 
   bcryptjs
     .genSalt(saltRounds)
@@ -141,7 +141,7 @@ router.delete('/delete-user/:id', routeGuard, (req, res, next) => {
       res.status(200).json({ user: req.user });
       return;
     }
-    res.status(401).json({ message: 'You are not logged in!' });
+    res.status(401).json({ message: 'Enter email and password!' });
   });
 //=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==
 router.get('/users', (req,res) => {
