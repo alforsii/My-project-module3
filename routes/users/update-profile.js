@@ -9,6 +9,11 @@ const routeGuard = require('../../configs/route-guard.configs');
 //POST update profile
 //=--=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-==-=-
 router.post('/upload-profile',routeGuard,(req, res) => {
+  const {firstName,lastName,email,password} = req.body
+  if(!firstName || !lastName || !email || !password) {
+    res.status(401).json({message: 'First name, last name, email and password are required!'});
+    return
+  }
       User.findByIdAndUpdate(req.user._id, req.body, {new: true})
         .then(userFromDB => {
         console.log("userFromDB", userFromDB)
@@ -21,6 +26,10 @@ router.post('/upload-profile',routeGuard,(req, res) => {
 //=--=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-==-=-
 router.post('/upload-photo',routeGuard, uploadCloud.single('image'),
     (req, res) => {
+      if(!req.file.url) {
+        res.status(401).json({message: 'Did you select right path? Sorry, I can\'t update you image.'});
+        return
+      }
       User.findByIdAndUpdate(req.user._id, {
         path: req.file.url,
       })
@@ -34,6 +43,10 @@ router.post('/upload-photo',routeGuard, uploadCloud.single('image'),
 //=--=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-==-=-
 router.post('/update/dashboard-image',routeGuard, uploadCloud.single('image'),
     (req, res) => {
+      if(!req.file.url) {
+        res.status(401).json({message: 'Did you select right path? Sorry, I can\'t update your dashboard image.'});
+        return
+      }
       User.findByIdAndUpdate(req.user._id, {
         dashboardImg: req.file.url,
       }, {new: true})
