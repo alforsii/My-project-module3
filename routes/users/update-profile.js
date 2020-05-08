@@ -11,7 +11,7 @@ const routeGuard = require('../../configs/route-guard.configs');
 //POST update profile
 //=--=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-==-=-
 router.post('/upload-profile',routeGuard,(req, res) => {
-  const { username,firstName, lastName, email, password } = req.body;
+  const { username,firstName, lastName, email, phone, password, city, state, country } = req.body;
 
   if (!username || !firstName || !lastName || !email || !password) {
     res.status(401).json({
@@ -36,10 +36,11 @@ router.post('/upload-profile',routeGuard,(req, res) => {
     .then(salt => bcryptjs.hash(password, salt))
     .then(hashedPassword => {
         User.findByIdAndUpdate(req.user._id, {
-        ...res.body,
+          username,firstName, lastName, email, phone, city, state, country,
         password: hashedPassword
       }, {new: true})
         .then(user => {
+        console.log("Output for: user", user)
            res.status(200).json({message: 'Thanks! Password successfully updated!', user})
         })
     })
