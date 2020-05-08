@@ -47,7 +47,7 @@ router.get('/:classId/other-teachers', (req,res) => {
       .sort({ firstName: 1 })
       .then(allUsersFromDB => {
         const otherTAs = allUsersFromDB.filter(user => 
-          user.title === 'TA' && !classFromDB.teachers.includes(user._id) 
+          user.title === 'Teacher' && !classFromDB.teachers.includes(user._id) 
           && user._id.toString() !== req.user._id.toString()).map(user => {
             user.password = undefined
             return user

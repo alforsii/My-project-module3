@@ -4,8 +4,8 @@ const { Schema, model } = mongoose;
 const classesSchema = new Schema(
   {
     name: String,
-    grade: String,
-    schoolYearStart: String,
+    grade: { type: String, default: 'Any'},
+    schoolYearStart: {type: String, default: new Date().toString()},
     schoolYearEnd: String,
     path: { type: String, default: '/images/cartoon-kids.jpg'},
     description: { type: String, default: 'You can update description at any time.'},
