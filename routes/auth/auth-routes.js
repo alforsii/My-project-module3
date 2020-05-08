@@ -36,7 +36,7 @@ const routeGuard = require('../../configs/route-guard.configs');
   //signup
   //=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==
 router.post('/signup', (req, res, next) => {
-  const { username,firstName, lastName, email, password } = req.body;
+  const { username,firstName, lastName, email, password, title } = req.body;
 
   if (!username || !firstName || !lastName || !email || !password) {
     res.status(401).json({
@@ -64,6 +64,7 @@ router.post('/signup', (req, res, next) => {
         firstName,
         lastName,
         email,
+        title,
         password: hashedPassword
       })
         .then(user => {
