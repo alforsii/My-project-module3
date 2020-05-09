@@ -41,7 +41,7 @@ router.post('/signup', (req, res, next) => {
   if (!username || !firstName || !lastName || !email || !password) {
     res.status(401).json({
       message:
-        'All fields are mandatory! Fill out all the inputs and try again'
+        'All fields are mandatory except type field. Please fill out all the inputs and try again!'
     });
     return;
   }
@@ -74,9 +74,9 @@ router.post('/signup', (req, res, next) => {
             if (err)
               return res
                 .status(500)
-                .json({ message: 'Something went wrong with login!' });
+                .json({ message: 'Successfully signup, but something went wrong with login! Please go to login and try to login. Sorry for inconvenience!' });
             user.password = undefined;
-            res.status(200).json({ message: 'Login successful!', user });
+            res.status(200).json({ message: 'Signed up successful!', user });
           });
         })
         .catch(err => {
@@ -111,7 +111,7 @@ router.post('/login', (req, res, next) => {
     }
   
       req.login(user, err => {
-        if (err) return res.status(500).json({ message: 'Something went wrong with login!' });
+        if (err) return res.status(500).json({ message: 'Sorry, something went wrong with login!' });
         user.password = undefined;
         res.status(200).json({ message: 'Login successful!', user });
       });
@@ -121,14 +121,15 @@ router.post('/login', (req, res, next) => {
 
 // logout
 //=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==
-router.post('/logout', routeGuard, (req, res, next) => {
+router.post('/logout', routeGuard, (req, res) => {
+  const theUser = req.user
     req.logout();
-    res.status(200).json({ message: 'Logout successful!' });
+    res.status(200).json({ message: `Logout successful! We gonna miss you ${theUser.firstName}😌! Hope to see you soon, bye!👋` });
   });
 
 // delete user
 //=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==
-router.delete('/delete-user/:id', routeGuard, (req, res, next) => {
+router.delete('/delete-user/:id', routeGuard, (req, res) => {
     User.findByIdAndDelete(req.params.id)
     .then(deletedUser => {
       res.status(200).json({message: 'User deleted', data: deletedUser})
