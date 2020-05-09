@@ -55,8 +55,9 @@ router.post('/signup', (req, res) => {
     return;
   }
 
-  User.find({email})
+  User.findOne({email})
   .then(isUserExists => {
+  console.log("Output for: isUserExists", isUserExists)
     if(isUserExists){
       res.status(403).json({ message: `User with this email address already registered!`})
       return
