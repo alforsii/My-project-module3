@@ -35,7 +35,7 @@ const routeGuard = require('../../configs/route-guard.configs');
   //=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==
   //signup
   //=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==
-router.post('/signup', (req, res, next) => {
+router.post('/signup', (req, res) => {
   const { username,firstName, lastName, email, password, title } = req.body;
 
   if (!username || !firstName || !lastName || !email || !password) {
@@ -55,44 +55,57 @@ router.post('/signup', (req, res, next) => {
     return;
   }
 
+  User.find({email})
+  .then(isUserExists => {
+    if(isUserExists){
+      res.status(403).json({ message: `User with this email address already registered!`})
+      return
+    }
+
+
   bcryptjs
-    .genSalt(saltRounds)
-    .then(salt => bcryptjs.hash(password, salt))
-    .then(hashedPassword => {
-      return User.create({
-        username,
-        firstName,
-        lastName,
-        email,
-        title,
-        password: hashedPassword
-      })
-        .then(user => {
-          // user.password = undefined;
-          // res.status(200).json({ user });
-          req.login(user, err => {
-            if (err)
-              return res
-                .status(500)
-                .json({ message: 'Successfully signup, but something went wrong with login! Please go to login and try to login. Sorry for inconvenience!' });
-            user.password = undefined;
-            res.status(200).json({ message: 'Signed up successful!', user });
-          });
-        })
-        .catch(err => {
-          if (err instanceof mongoose.Error.ValidationError) {
-            res.status(500).json({ message: err.message });
-          } else if (err.code === 11000) {
-            res.status(500).json({
-              message:
-                'Username and email need to be unique. Either username or email is already used.'
-            });
-          } else {
-            next(err);
-          }
-        });
+  .genSalt(saltRounds)
+  .then(salt => bcryptjs.hash(password, salt))
+  .then(hashedPassword => {
+    return User.create({
+      username,
+      firstName,
+      lastName,
+      email,
+      title,
+      password: hashedPassword
     })
-    .catch(err => next(err));
+      .then(user => {
+        
+        req.login(user, err => {
+          if (err)
+            return res
+              .status(500)
+              .json({ message: 'Successfully signup, but something went wrong with login! Please go to login and try to login. Sorry for inconvenience!' });
+          user.password = undefined;
+          res.status(200).json({ message: 'Signed up successful!', user });
+        });
+      })
+      .catch(err => {
+        if (err instanceof mongoose.Error.ValidationError) {
+          res.status(500).json({ message: err.message });
+        } else if (err.code === 11000) {
+          res.status(500).json({
+            message:
+              'Username and email need to be unique. Either username or email is already used.'
+          });
+        } else {
+          console.log(err);
+        }
+      });
+  })
+  .catch(err => console.log(err));
+
+  })
+  .catch(err => {
+    res.status(500).json({ message: 'Sorry something went wrong in the server. Please, try later!'})
+  })
+
 });
 
 //=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==
