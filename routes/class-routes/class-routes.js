@@ -15,11 +15,11 @@ function getAllClasses(id,req, res){
   User.findById(id)
   .populate({
     path: 'archive',
-    populate: [{ path: 'author'}, { path: 'students'}, { path: 'teachers'}]
+    populate: [{ path: 'author'}, { path: 'students'}, { path: 'teachers'}, { path: 'classworks'}]
   })
   .populate({
     path: 'classes',
-    populate: [{ path: 'author'}, { path: 'students'}, { path: 'teachers'}]
+    populate: [{ path: 'author'}, { path: 'students'}, { path: 'teachers'}, { path: 'classworks'}]
   })
     .then(userFromDB => {
       const updatedClasses = removeUsersPassword(userFromDB.classes, req)
