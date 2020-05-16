@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-const User = require('../../models/User.model');
+// const User = require('../../models/User.model');
 const Class = require('../../models/Class.model');
 const Classwork = require('../../models/Classwork.model')
 
 
 
 //get all classworks
+//=-=-=-=-=-=--=--=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=
 router.get('/:classId/classworks', (req,res) => {
     const {classId} = req.params
     Class.findById(classId)
@@ -29,10 +30,12 @@ router.get('/:classId/classworks', (req,res) => {
     })
     .catch(err => console.log(`Error while updating class to add new classwork ${err}`))
 })
+
 //create classwork
+//=-=-=-=-=-=--=--=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=
 router.post('/:classId/classwork/create', (req,res) => {
     const {classId} = req.params
-    console.log("create classwork: req.body", req.body)
+
     Classwork.create({...req.body, author: req.user._id})
     .then(newClasswork => {
         Class.findByIdAndUpdate(classId, { $push: { classworks: newClasswork._id}}, { new: true })
