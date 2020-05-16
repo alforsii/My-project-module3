@@ -9,7 +9,6 @@ const classworksSchema = new Schema(
       author: { type: Schema.Types.ObjectId, ref: 'User' },
       currClass: { type: Schema.Types.ObjectId, ref: 'Class' },
       description: { type: String, default: 'You can update description at any time.'},
-      assignedStudents: { type: [{ type: Schema.Types.ObjectId, ref: 'User' }]},
       comments: { type: [{ type: Schema.Types.ObjectId, ref: 'Message' }]},
       students: { type: [{ type: Schema.Types.ObjectId, ref: 'User' }]},
   },

@@ -22,8 +22,8 @@ if (process.env.NODE_ENV === 'development') {
 app.use(
     cors({
          // origin: ['www.web-side.com', 'http://localhost:3000']
-      // origin: [process.env.FRONTEND_POINT],
-      origin: true,
+      origin: [process.env.FRONTEND_POINT],
+      // origin: true,
       credentials: true, // this needs set up on the frontend side as well
       //                   in axios "withCredentials: true"
       //    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -36,6 +36,7 @@ app.use(
 app.use('/api/auth', require('./routes/auth/auth-routes'))
 
 app.use('/api/classes', require('./routes/class-routes/class-routes'))
+app.use('/api/classes', require('./routes/class-routes/posts-routes'))
 app.use('/api/classes', require('./routes/class-routes/classworks-routes'))
 app.use('/api/classes', require('./routes/class-routes/class-students-routes'))
 app.use('/api/classes', require('./routes/class-routes/class-teachers-routes'))

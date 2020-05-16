@@ -13,8 +13,9 @@ const classesSchema = new Schema(
     students: { type: [{ type: Schema.Types.ObjectId, ref: 'User' }]},
     // students: { type: [{ type: Schema.Types.ObjectId, ref: 'Student' }] },
     teachers: { type: [{ type: Schema.Types.ObjectId, ref: 'User' }]},
-    subjects: { type: [{ type: Schema.Types.ObjectId, ref: 'Subject' }]},
+    // subjects: { type: [{ type: Schema.Types.ObjectId, ref: 'Subject' }]},
     classworks: { type: [{ type: Schema.Types.ObjectId, ref: 'Classwork' }]},
+    posts: { type: [{ type: Schema.Types.ObjectId, ref: 'Post' }]},
   },
   {
     timestamps: true,
