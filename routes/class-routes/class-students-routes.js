@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const User = require('../../models/User.model');
 const Class = require('../../models/Class.model');
-// const Student = require('../../models/Student.model');
 
 //-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
 //Get current class students
@@ -12,11 +11,11 @@ router.get('/:classId/class-students', (req, res) => {
   Class.findById(classId)
     .populate('author')
     .populate('students')
-    .then(classFromDB => {
+    .then((classFromDB) => {
       const updatedClass = removeUsersPassword([classFromDB], req)[0];
       res.status(200).json({ currentClass: updatedClass });
     })
-    .catch(err =>
+    .catch((err) =>
       console.log(`Error while getting current class students ${err}`)
     );
 });
@@ -24,14 +23,14 @@ router.get('/:classId/class-students', (req, res) => {
 //update function - remove/hide users password === undefined
 //and filter out current student
 function removeUsersPassword(classes, req) {
-  return classes.map(eachClass => {
+  return classes.map((eachClass) => {
     eachClass.author.password = undefined;
     eachClass.students = eachClass.students
-      .map(student => {
+      .map((student) => {
         student.password = undefined;
         return student;
       })
-      .filter(student => student._id.toString() !== req.user._id.toString());
+      .filter((student) => student._id.toString() !== req.user._id.toString());
     return eachClass;
   });
 }
@@ -42,24 +41,26 @@ function removeUsersPassword(classes, req) {
 router.get('/:classId/other-students', (req, res) => {
   const { classId } = req.params;
   Class.findById(classId)
-    .then(classFromDB => {
+    .then((classFromDB) => {
       User.find()
-      .sort({ firstName: 1 })
-        .then(allUsersFromDB => {
-          const otherStudents = allUsersFromDB.filter(
-            user =>
-              user.title === 'Student' &&
-              !classFromDB.students.includes(user._id) &&
-              user._id.toString() !== req.user._id.toString()
-          ).map(user => {
-            user.password = undefined
-            return user
-          })
+        .sort({ firstName: 1 })
+        .then((allUsersFromDB) => {
+          const otherStudents = allUsersFromDB
+            .filter(
+              (user) =>
+                user.title === 'Student' &&
+                !classFromDB.students.includes(user._id) &&
+                user._id.toString() !== req.user._id.toString()
+            )
+            .map((user) => {
+              user.password = undefined;
+              return user;
+            });
           res.status(200).json({ students: otherStudents });
         })
-        .catch(err => console.log(`Error in DB ${err}`));
+        .catch((err) => console.log(`Error in DB ${err}`));
     })
-    .catch(err =>
+    .catch((err) =>
       console.log(`Error while getting current class students ${err}`)
     );
 });
@@ -72,7 +73,7 @@ router.post('/add-student', (req, res) => {
   const { userId, classId } = req.body;
   //just in case checking if class does not have the same student already.
   Class.findById(classId)
-    .then(classFromDB => {
+    .then((classFromDB) => {
       //if not found then add new student to the class
       if (classFromDB.students.indexOf(userId) === -1) {
         Class.findByIdAndUpdate(
@@ -80,42 +81,41 @@ router.post('/add-student', (req, res) => {
           { $push: { students: userId } },
           { new: true }
         )
-          .then(classUpdated => {
+          .then((classUpdated) => {
             //here just in case checking if user/student does not have the same class.
             User.findById(userId)
-              .then(userFromDB => {
-
-              userFromDB.password = undefined
+              .then((userFromDB) => {
+                userFromDB.password = undefined;
                 // if not then add class to the students class list.
                 res.status(200).json({ studentFromDB: userFromDB });
-                console.log("student added to classrooms list")
+                console.log('student added to classrooms list');
                 if (userFromDB.classes.indexOf(classId) === -1) {
                   User.findByIdAndUpdate(
                     userId,
                     { $push: { classes: classId } },
                     { new: true }
                   )
-                    .then(updatedStudentFromDB => {
-                      updatedStudentFromDB.password = undefined
-                      console.log("class added to students classrooms list")
+                    .then((updatedStudentFromDB) => {
+                      updatedStudentFromDB.password = undefined;
+                      console.log('class added to students classrooms list');
                     })
-                    .catch(err =>
+                    .catch((err) =>
                       console.log(
                         `Error while adding classId to the student classes list ${err}`
                       )
                     );
                 }
               })
-              .catch(err => console.log(err));
+              .catch((err) => console.log(err));
           })
-          .catch(err =>
+          .catch((err) =>
             console.log(
               `Error while adding the student to the class students list ${err}`
             )
           );
       }
     })
-    .catch(err => console.log(err));
+    .catch((err) => console.log(err));
 });
 
 //-=-==-=--=-=-=-=-=--=-=-=-=---=-==--=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=
@@ -129,14 +129,14 @@ router.post('/remove-student', (req, res) => {
     { new: true }
   )
     .populate('students')
-    .then(updatedClassFromDB => {
-      const updatedStudents = updatedClassFromDB.students.map(student => {
+    .then((updatedClassFromDB) => {
+      const updatedStudents = updatedClassFromDB.students.map((student) => {
         student.password = undefined;
         return student;
       });
       res.status(200).json({ updatedStudents });
     })
-    .catch(err =>
+    .catch((err) =>
       console.log(
         `Error while getting class students to remove a student ${err}`
       )
